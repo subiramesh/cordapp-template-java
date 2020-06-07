@@ -11,38 +11,53 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 /**
- * Wraps an RPC connection to a Corda node.
- *
- * The RPC connection is configured using command line arguments.
+ * Wraps a node RPC proxy.
  */
 @Component
 public class NodeRPCConnection implements AutoCloseable {
-    // The host of the node we are connecting to.
-    @Value("${config.rpc.host}")
-    private String host;
-    // The RPC port of the node we are connecting to.
-    @Value("${config.rpc.username}")
-    private String username;
-    // The username for logging into the RPC client.
-    @Value("${config.rpc.password}")
-    private String password;
-    // The password for logging into the RPC client.
-    @Value("${config.rpc.port}")
-    private int rpcPort;
+    private final String host;
+    private final String username;
+    private final String password;
+    private final int rpcPort;
+
 
     private CordaRPCConnection rpcConnection;
-    CordaRPCOps proxy;
+    private CordaRPCOps proxy; // The RPC proxy
+
+    /**
+     * The RPC proxy is configured based on the properties in `application.properties`.
+     * @param host The host of the node we are connecting to.
+     * @param rpcPort The RPC port of the node we are connecting to.
+     * @param username The username for logging into the RPC client.
+     * @param password The password for logging into the RPC client.
+     */
+    public NodeRPCConnection(
+            @Value("${" + CONSTANTS.CORDA_NODE_HOST + "}") String host,
+            @Value("${" + CONSTANTS.CORDA_USER_NAME + "}") String username,
+            @Value("${" + CONSTANTS.CORDA_USER_PASSWORD + "}") String password,
+            @Value("${" + CONSTANTS.CORDA_RPC_PORT + "}") int rpcPort
+    ) {
+        this.host = host;
+        this.username = username;
+        this.password = password;
+        this.rpcPort = rpcPort;
+    }
 
     @PostConstruct
     public void initialiseNodeRPCConnection() {
         NetworkHostAndPort rpcAddress = new NetworkHostAndPort(host, rpcPort);
         CordaRPCClient rpcClient = new CordaRPCClient(rpcAddress);
-        rpcConnection = rpcClient.start(username, password);
-        proxy = rpcConnection.getProxy();
+        this.rpcConnection = rpcClient.start(username, password);
+        this.proxy = rpcConnection.getProxy();
+    }
+
+    public CordaRPCOps getProxy() {
+        return proxy;
     }
 
     @PreDestroy
-    public void close() {
+    @Override
+    public void close() throws Exception {
         rpcConnection.notifyServerAndClose();
     }
 }

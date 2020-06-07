@@ -11,6 +11,7 @@ import net.corda.core.flows.ReceiveFinalityFlow;
  * @author suramesh
  * Implements the logic that takes place once the flow is iniated by the Helper Tenant and passed to Source Tenant for signing
  */
+/*
 @InitiatedBy(StartReconciliation.class)
 public class CheckTransaction extends FlowLogic<Void> {
     private FlowSession counterpartySession;
@@ -27,3 +28,4 @@ public class CheckTransaction extends FlowLogic<Void> {
         return null;
     }
 }
+*/

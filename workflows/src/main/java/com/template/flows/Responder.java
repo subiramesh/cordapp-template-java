@@ -5,23 +5,24 @@ import net.corda.core.flows.FlowException;
 import net.corda.core.flows.FlowLogic;
 import net.corda.core.flows.FlowSession;
 import net.corda.core.flows.InitiatedBy;
+import net.corda.core.flows.ReceiveFinalityFlow;
+import net.corda.core.transactions.SignedTransaction;
 
-// ******************
-// * Responder flow *
-// ******************
 @InitiatedBy(Initiator.class)
-public class Responder extends FlowLogic<Void> {
-    private FlowSession counterpartySession;
+public class Responder extends FlowLogic<SignedTransaction> {
 
-    public Responder(FlowSession counterpartySession) {
-        this.counterpartySession = counterpartySession;
+    private FlowSession counterPartySession;
+
+    public Responder(FlowSession counterPartySession) {
+        this.counterPartySession = counterPartySession;
     }
 
-    @Suspendable
     @Override
-    public Void call() throws FlowException {
-        // Responder flow logic goes here.
-
-        return null;
+    @Suspendable
+    public SignedTransaction call() throws FlowException {
+        return subFlow(new ReceiveFinalityFlow(counterPartySession));
     }
+
+
 }
+

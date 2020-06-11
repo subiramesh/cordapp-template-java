@@ -24,9 +24,6 @@ public class TransactionContract implements Contract {
 
     // This is used to identify our contract when building a transaction.
     public static final String ID = "com.template.contracts.TransactionContract";
-    private CordaX500Name PayPal = new CordaX500Name("PayPal","London","GB");
-    private CordaX500Name BrainTree = new CordaX500Name("BrainTree","London","GB");
-    Collection<CordaX500Name> recognizedTenants = Arrays.asList(PayPal, BrainTree);
 
 
 
@@ -44,8 +41,7 @@ public class TransactionContract implements Contract {
                 req.using("Transaction must have exactly one output.", outputs.size() == 1);
                 req.using("Output must be a TransactionState.", outputs.get(0) instanceof TransactionState);
                 TransactionState output = (TransactionState)outputs.get(0);
-                req.using("Source Tenant and Helper Tenant cannot be the same",!output.getHelperTenant().equals(output.getSourceTenant()));
-
+                req.using("Transaction amount cannot be greater than 1000 dollars.",(output.getAmount().getQuantity()/100)<1000);
                 return null;
             });
         } else {

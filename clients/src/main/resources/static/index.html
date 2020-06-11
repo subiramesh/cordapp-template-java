@@ -22,11 +22,13 @@
     <nav class="navbar navbar-default">
         <div class="container-fluid">
             <div class="navbar-header">
-                <a class="navbar-brand" href="#">{{demoApp.thisNode}}</a>
+                <a class="navbar-brand" href="#">Reconciliation Simplified</a>
             </div>
             <button ng-click="demoApp.openCreateTransactionModal()" type="button" class="btn btn-primary navbar-btn">Create New Transaction</button>
             <button ng-click="demoApp.refresh()" type="button" class="btn btn-default navbar-btn"><span
                     class="glyphicon glyphicon-refresh"></span></button>
+            <br>
+            <image src="logo.png" alt="PayPal"/>
         </div>
     </nav>
 
@@ -37,22 +39,20 @@
         <form>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="createTransactionCounterparty" class="control-label">Counter-party:</label>
-                    <select ng-model="createTransactionModal.form.counterparty" class="form-control" id="createTransactionCounterparty"
-                            ng-options="peer as peer for peer in createTransactionModal.peers">
-                    </select>
+                    <label for="createTransactionMerchantAccountNumber" class="control-label">Your Account Number:</label>
+                    <input type="text" ng-model="createTransactionModal.form.merchantAccountNumber" class="form-control" id="createTransactionMerchantAccountNumber">
                 </div>
                 <div class="form-group">
                     <label for="createTransactionCurrency" class="control-label">Currency (ISO code):</label>
                     <input type="text" ng-model="createTransactionModal.form.currency" class="form-control" id="createTransactionCurrency">
                 </div>
                 <div class="form-group">
-                    <label for="createTransactionAmount" class="control-label">Amount (Int):</label>
+                    <label for="createTransactionAmount" class="control-label">Amount:</label>
                     <input type="text" ng-model="createTransactionModal.form.amount" class="form-control" id="createTransactionAmount">
                 </div>
                 <div class="form-group">
-                    <label for="createTransactionID" class="control-label">Transaction ID:</label>
-                    <input type="text" ng-model="createTransactionModal.form.transactionID" class="form-control" id="createTransactionID">
+                    <label for="createTransactionReceiverAccountNumber" class="control-label">Payee account number here:</label>
+                    <input type="text" ng-model="createTransactionModal.form.receiverAccountNumber" class="form-control" id="createTransactionReceiverAccountNumber">
                 </div>
                 <div ng-show="createTransactionModal.formError" class="form-group">
                     <div class="alert alert-danger" role="alert">
@@ -92,19 +92,18 @@
                     <table class="table">
                         <thead>
                         <tr>
-                            <th>Transaction Initiated By</th>
-                            <th>Transaction Carried out by</th>
-                            <th>Amount</th>
                             <th>Transaction ID</th>
-                            <th>Actions</th>
+                            <th>Merchant Account Number</th>
+                            <th>Receiver Account Number</th>
+                            <th>Amount</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr ng-repeat="transaction in demoApp.transactions">
-                            <td class="vert-align">{{transaction.sourceTenant}}</td>
-                            <td class="vert-align">{{transaction.helperTenant}}</td>
+                            <td class="vert-align">{{transaction.txnUUID}}</td>
+                            <td class="vert-align">{{transaction.merchantAccountNumber}}</td>
+                            <td class="vert-align">{{transaction.receiverAccountNumber}}</td>
                             <td class="vert-align">{{transaction.amount}}</td>
-                            <td class="vert-align">{{transaction.transactionID}}</td>
                         </tr>
                         </tbody>
                     </table>

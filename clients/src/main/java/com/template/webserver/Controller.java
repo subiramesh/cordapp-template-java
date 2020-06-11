@@ -27,6 +27,7 @@ import java.util.Currency;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -100,32 +101,27 @@ public class Controller {
     }
 
     @GetMapping(value = "/transactions",produces = APPLICATION_JSON_VALUE)
-    public List<StateAndRef<TransactionState>> getIOUs() {
-        // Filter by state type: IOU.
+    public List<StateAndRef<TransactionState>> getTransactions() {
         return proxy.vaultQuery(TransactionState.class).getStates();
     }
 
     @GetMapping(value =  "/start-reconciliation" , produces = TEXT_PLAIN_VALUE )
-    public ResponseEntity<String> startReconciliation(@RequestParam(value = "otherParty") String otherParty,
+    public ResponseEntity<String> startReconciliation(@RequestParam(value = "merchantAccountNumber") String merchantAccountNumber,
                                            @RequestParam(value = "currency") String currency,
                                            @RequestParam(value = "amount") int amount,
-                                           @RequestParam(value = "transactionID") String transactionId) throws IllegalArgumentException {
-        // Get party objects for myself and the counterparty.
+                                           @RequestParam(value = "receiverAccountNumber") String receiverAccountNumber) throws IllegalArgumentException {
         logger.info("REQUEST ACCEPTED");
-        Party me = proxy.nodeInfo().getLegalIdentities().get(0);
-        CordaX500Name name = CordaX500Name.parse(otherParty);
-        Party otherCordaParty = Optional.ofNullable(proxy.wellKnownPartyFromX500Name(name)).orElseThrow(() -> new IllegalArgumentException("Unknown party name."));
         Amount<Currency> parsedAmount = new Amount<>((long) amount * 100, Currency.getInstance(currency));
-        // Create a new IOU state using the parameters given.
+        UUID txnUUID = UUID.randomUUID();
+        String parsedUUID = txnUUID.toString();
         try {
-            TransactionState transactionState = new TransactionState(transactionId,parsedAmount,me,otherCordaParty);
-            // Start the IOUIssueFlow. We block and waits for the flow to return.
-            SignedTransaction result = proxy.startTrackedFlowDynamic(Initiator.class, otherCordaParty,parsedAmount,transactionId).getReturnValue().get();
-            // Return the response.
+
+            SignedTransaction result = proxy.startTrackedFlowDynamic(Initiator.class, parsedUUID,parsedAmount,merchantAccountNumber,receiverAccountNumber).getReturnValue().get();
+
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body("Transaction id "+ result.getId() +" committed to ledger.\n " + result.getTx().getOutput(0));
-            // For the purposes of this demo app, we do not differentiate by exception type.
+
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)

@@ -17,8 +17,10 @@ import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Currency;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @InitiatingFlow
@@ -26,14 +28,17 @@ import java.util.stream.Collectors;
 public class Initiator extends FlowLogic<SignedTransaction> {
     private final ProgressTracker progressTracker = new ProgressTracker();
 
-    private final Party otherParty;
+    private final String txnUUID;
     private final Amount<Currency> amount;
-    private final String transactionId;
+    private final String merchantAccountNumber;
+    private final String receiverAccountNumber;
 
-    public Initiator(Party otherParty, Amount<Currency> amount, String transactionId) {
-        this.otherParty = otherParty;
+
+    public Initiator(String txnUUID, Amount<Currency> amount, String merchantAccountNumber, String receiverAccountNumber) {
+        this.txnUUID = txnUUID;
         this.amount = amount;
-        this.transactionId = transactionId;
+        this.merchantAccountNumber = merchantAccountNumber;
+        this.receiverAccountNumber = receiverAccountNumber;
     }
 
     @Override
@@ -42,18 +47,18 @@ public class Initiator extends FlowLogic<SignedTransaction> {
     }
 
     @Suspendable
-
     @Override
     public SignedTransaction call() throws FlowException {
         Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
-        Party customer = getOurIdentity();
+        Party BrainTree = getOurIdentity();
 
         List<Party> stakeholders = getServiceHub().getNetworkMapCache().getAllNodes().stream()
                 .map(nodeInfo -> nodeInfo.getLegalIdentities().get(0))
                 .collect(Collectors.toList());
-        stakeholders.remove(customer);
+        stakeholders.remove(BrainTree);
+        stakeholders.remove(notary);
 
-        TransactionState transactionState = new TransactionState(transactionId,amount,otherParty,getOurIdentity());
+        TransactionState transactionState = new TransactionState(txnUUID,amount,merchantAccountNumber,receiverAccountNumber,stakeholders,BrainTree);
         Command command = new Command<>(new TransactionContract.Commands.Reconcile(), getOurIdentity().getOwningKey());
         TransactionBuilder txBuilder = new TransactionBuilder(notary)
                 .addOutputState(transactionState, TransactionContract.ID)

@@ -1,6 +1,5 @@
 package com.template.states;
 
-import com.template.contracts.TemplateContract;
 import com.template.contracts.TransactionContract;
 import net.corda.core.contracts.Amount;
 import net.corda.core.contracts.BelongsToContract;
@@ -8,9 +7,10 @@ import net.corda.core.contracts.ContractState;
 import net.corda.core.identity.AbstractParty;
 import net.corda.core.identity.Party;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
+
 
 /**
  * @author suramesh
@@ -19,37 +19,54 @@ import java.util.List;
 @BelongsToContract(TransactionContract.class)
 public class TransactionState implements ContractState {
 
-    private String transactionID;
+    private String txnUUID;
     private Amount<Currency> amount;
-    private Party sourceTenant;
-    private Party helperTenant;
+    private String merchantAccountNumber;
+    private String receiverAccountNumber;
+    private List<Party> stakeholders;
+    private Party BrainTree;
 
-    public TransactionState(String transactionID, Amount<Currency> amount, Party sourceTenant, Party helperTenant) {
-        this.transactionID = transactionID;
+
+    public TransactionState(String txnUUID, Amount<Currency> amount, String merchantAccountNumber,
+                            String receiverAccountNumber, List<Party> stakeholders, Party BrainTree) {
+        this.txnUUID = txnUUID;
         this.amount = amount;
-        this.sourceTenant = sourceTenant;
-        this.helperTenant = helperTenant;
+        this.merchantAccountNumber = merchantAccountNumber;
+        this.receiverAccountNumber = receiverAccountNumber;
+        this.stakeholders = stakeholders;
+        this.BrainTree = BrainTree;
     }
+
+
 
     @Override
     public List<AbstractParty> getParticipants() {
-        return Arrays.asList(sourceTenant,helperTenant);
+        List<AbstractParty> allParties = new ArrayList<>(stakeholders);
+        allParties.add(BrainTree);
+        return allParties;
     }
 
-
-    public String getTransactionID() {
-        return transactionID;
+    public String getTxnUUID() {
+        return txnUUID;
     }
 
     public Amount<Currency> getAmount() {
         return amount;
     }
 
-    public Party getSourceTenant() {
-        return sourceTenant;
+    public String getMerchantAccountNumber() {
+        return merchantAccountNumber;
     }
 
-    public Party getHelperTenant() {
-        return helperTenant;
+    public String getReceiverAccountNumber() {
+        return receiverAccountNumber;
+    }
+
+    public List<Party> getStakeholders() {
+        return stakeholders;
+    }
+
+    public Party getBrainTree() {
+        return BrainTree;
     }
 }

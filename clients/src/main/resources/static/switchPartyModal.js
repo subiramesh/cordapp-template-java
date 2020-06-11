@@ -1,37 +1,27 @@
 "use strict";
 
-angular.module('demoAppModule').controller('CreateTransactionModalCtrl', function($http, $uibModalInstance, $uibModal, apiBaseURL, peers) {
+angular.module('demoAppModule').controller('switchPartyModalCtrl', function($http, $uibModalInstance, $uibModal, apiBaseURL, peers) {
     const createTransactionModal = this;
 
     createTransactionModal.peers = peers;
-    createTransactionModal.form = {};
-    createTransactionModal.formError = false;
 
     /** Validate and create an IOU. */
-    createTransactionModal.create = () => {
-        if (invalidFormInput()) {
-            createTransactionModal.formError = true;
-        } else {
-            createTransactionModal.formError = false;
-
-            const amount = createTransactionModal.form.amount;
-            const currency = createTransactionModal.form.currency;
-            const merchantAccountNumber = createTransactionModal.form.merchantAccountNumber;
-            const receiverAccountNumber = createTransactionModal.form.receiverAccountNumber;
+    switchPartyModal.switchParty = () => {
 
             $uibModalInstance.close();
 
+            const party = switchPartyModal.form.party;
             // We define the IOU creation endpoint.
-            const startTransactionEndpoint =
+            const switchPartyEndpoint =
                 apiBaseURL +
-                `start-reconciliation?merchantAccountNumber=${merchantAccountNumber}&currency=${currency}&amount=${amount}&receiverAccountNumber=${receiverAccountNumber}`;
+                `switch-party?party=${party}`;
 
             // We hit the endpoint to create the IOU and handle success/failure responses.
             $http.get(startTransactionEndpoint).then(
                 (result) => createTransactionModal.displayMessage(result),
                 (result) => createTransactionModal.displayMessage(result)
             );
-        }
+
     };
 
     /** Displays the success/failure response from attempting to create an IOU. */
@@ -54,8 +44,7 @@ angular.module('demoAppModule').controller('CreateTransactionModalCtrl', functio
 
     // Validates the IOU.
     function invalidFormInput() {
-        return isNaN(createTransactionModal.form.amount) || (createTransactionModal.form.merchantAccountNumber === undefined)
-        || (createTransactionModal.form.receiverAccountNumber == undefined);
+        return isNaN(createTransactionModal.form.amount) || (createTransactionModal.form.counterparty === undefined);
     }
 });
 
